@@ -47,11 +47,13 @@
             <groupId>com.cloudmine.api</groupId>
             <artifactId>cloudmine-javasdk</artifactId>
             <version>0.3-SNAPSHOT</version>
+            <systemPath>${basedir}/libs/cloudmine-javasdk-0.3-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudmine</groupId>
             <artifactId>coderunner</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <systemPath>${basedir}/libs/coderunner-0.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
