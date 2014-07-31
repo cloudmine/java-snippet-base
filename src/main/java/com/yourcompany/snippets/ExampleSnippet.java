@@ -1,16 +1,12 @@
 package com.yourcompany.snippets;
 
 import com.cloudmine.api.CMApiCredentials;
-import com.cloudmine.api.CMObject;
-import com.cloudmine.api.CMSessionToken;
 import com.cloudmine.api.SimpleCMObject;
 import com.cloudmine.api.rest.CMWebService;
-import com.cloudmine.api.rest.UserCMWebService;
+import com.cloudmine.api.rest.callbacks.ObjectModificationResponseCallback;
 import com.cloudmine.api.rest.response.ObjectModificationResponse;
 import com.cloudmine.coderunner.SnippetArguments;
 import com.cloudmine.coderunner.SnippetContainer;
-
-import java.util.Map;
 
 /**
  * <br>
@@ -40,23 +36,18 @@ public class ExampleSnippet implements SnippetContainer {
      * is converted to JSON
      */
     public Object runSnippet(SnippetArguments arguments) {
-        //If we have a valid sessiontoken, this will take whatever was inserted, add it to the user store,
-        //and then delete it from the application store. It will return the result of deleting the objects if
-        //the insert was a success, the response to updating the objects if that failed, and a SimpleCMObject with
-        //a single "ran"=false value if we did not get a valid token.
-        CMSessionToken token = arguments.getSessionToken();
-        if(token.isValid()) {
-            final UserCMWebService userService = CMWebService.getService().getUserWebService(token);
-            final Map<String, CMObject> returnedValues = arguments.getSuccessDataObjects(); //This will only return something valid if this was a GET request
-            ObjectModificationResponse response = userService.insert(arguments.getSuccessTransportableRepresentation());
-            if(response.wasSuccess()) {
-                return CMWebService.getService().delete(returnedValues.keySet());
+        CMWebService service = CMWebService.getService();
+        service.setSync(true); //Run our async methods synchronously, so we can use them inside this snippet
+        final SimpleCMObject yesToken = new SimpleCMObject();
+        yesToken.add("ran", true);
+        yesToken.add("inserted", false);
+        service.asyncInsert(yesToken, new ObjectModificationResponseCallback() {
+            public void onCompletion(ObjectModificationResponse response) {
+                yesToken.add("inserted", true);
             }
-            return response;
-        }
-        SimpleCMObject noToken = new SimpleCMObject();
-        noToken.add("ran", false);
-        return noToken;
+        });
+        //yesToken.inserted will = true in the response, since we set our service to be sync
+        return yesToken;
     }
 
 }
